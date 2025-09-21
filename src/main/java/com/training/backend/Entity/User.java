@@ -1,9 +1,7 @@
 package com.training.backend.Entity;
 
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,10 +36,12 @@ public class User {
   @Enumerated(EnumType.STRING)
   private Role role;
 
+  // Relation with Progress
   @OneToMany(mappedBy = "user")
   @JsonManagedReference(value = "user-progress")
   private List<Progress> progress;
 
+  // Relation with Insignia
   @OneToMany(mappedBy = "user")
   @JsonManagedReference(value = "user-insignia")
   private List<Insignia> insignias;

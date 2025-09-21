@@ -1,9 +1,9 @@
 package com.training.backend.Entity;
 
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,4 +37,18 @@ public class Course {
   @OneToMany(mappedBy = "course")
   @JsonBackReference(value = "course-progress")
   private List<Progress> progress;
+
+  @OneToMany(mappedBy = "course")
+  @JsonIgnoreProperties("course")
+  private List<Insignia> insignias;
+
+  // Method for JSON serialization to get the latest progress status
+  @JsonGetter("status")
+  public ProgressStatus getStatus() {
+    if (progress == null || progress.isEmpty()) {
+      return ProgressStatus.NOT_STARTED;
+    }
+    return progress.get(progress.size() - 1).getStatus();
+  }
+
 }

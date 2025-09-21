@@ -1,14 +1,14 @@
 package com.training.backend.Services;
 
 import java.util.List;
-
-import org.springframework.dao.DataIntegrityViolationException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.training.backend.Entity.Progress;
 import com.training.backend.Repository.CourseRepository;
 import com.training.backend.Repository.ProgressRepository;
 import com.training.backend.Repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -18,6 +18,17 @@ public class ProgressService {
   private final UserRepository userRepository;
   private final CourseRepository courseRepository;
 
+  // Method to get all progress records
+  public List<Progress> getAllProgress() {
+    return progressRepository.findAll();
+  }
+
+  // Method to get progress records by user ID
+  public List<Progress> getProgressByUser(Long userId) {
+    return progressRepository.findAllByUserId(userId);
+  }
+
+  // Method to create a new progress record
   public Progress createProgress(Progress progress) {
     if (!userRepository.existsById(progress.getUser().getId())) {
       throw new RuntimeException("Usuario no existe con id " + progress.getUser().getId());
@@ -28,31 +39,20 @@ public class ProgressService {
     return progressRepository.save(progress);
   }
 
-  public List<Progress> getAllProgress() {
-    return progressRepository.findAll();
+  // Method to update an existing progress record
+  @Transactional
+  public Progress updateProgress(Long id, Progress updatedProgress) {
+    Progress progress = progressRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Progress no encontrado"));
+
+    progress.setStatus(updatedProgress.getStatus());
+    progress.setDateUpdated(updatedProgress.getDateUpdated());
+
+    return progressRepository.save(progress);
   }
 
-  public Progress updateProgress(Long id, Progress progressDetails) {
-    return progressRepository.findById(id).map(progress -> {
-      progress.setUser(progressDetails.getUser());
-      progress.setCourse(progressDetails.getCourse());
-      progress.setStatus(progressDetails.getStatus());
-      progress.setDateUpdated(progressDetails.getDateUpdated());
-      return progressRepository.save(progress);
-    }).orElseThrow(() -> new RuntimeException("Progreso  no encontrado con id " + id));
+  public Optional<Progress> getByUserAndCourse(Long userId, Long courseId) {
+    return progressRepository.findByUserIdAndCourseId(userId, courseId);
   }
 
-  public void deleteProgress(Long id) {
-    try {
-      if (!progressRepository.existsById(id)) {
-        throw new RuntimeException("Progreso no encontrado con id " + id);
-      }
-      progressRepository.deleteById(id);
-    } catch (DataIntegrityViolationException ex) {
-      throw new RuntimeException(
-          "No se puede eliminar el progreso porque tiene dependencias asociadas.", ex);
-    } catch (Exception e) {
-      throw new RuntimeException("Error al eliminar el progreso con id " + id, e);
-    }
-  }
 }

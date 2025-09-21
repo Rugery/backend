@@ -3,12 +3,9 @@ package com.training.backend.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.training.backend.Dto.UserLoginResponse;
 import com.training.backend.Services.AuthService;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -19,10 +16,13 @@ public class AuthController {
 
   private final AuthService authService;
 
+  // Endpoint for user login
   @PostMapping("/login")
   public ResponseEntity<UserLoginResponse> login(@RequestParam String email,
       @RequestParam String password) {
+    // Calls the service layer to authenticate the user
     UserLoginResponse response = authService.login(email, password);
+    // Returns the authentication response to the client
     return ResponseEntity.ok(response);
   }
 

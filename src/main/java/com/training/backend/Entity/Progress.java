@@ -2,6 +2,8 @@ package com.training.backend.Entity;
 
 import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonGetter;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -25,11 +27,13 @@ public class Progress {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  // Relation with User
   @ManyToOne
   @JoinColumn(name = "user_id")
   @JsonBackReference(value = "user-progress")
   private User user;
 
+  // Relation with Course
   @ManyToOne
   @JoinColumn(name = "course_id")
   @JsonBackReference(value = "course-progress")
@@ -39,5 +43,11 @@ public class Progress {
   private ProgressStatus status;
 
   private LocalDate dateUpdated;
+
+  // Method for JSON serialization to get the course title
+  @JsonGetter("courseTitle")
+  public String getCourseTitle() {
+    return course != null ? course.getTitle() : null;
+  }
 
 }

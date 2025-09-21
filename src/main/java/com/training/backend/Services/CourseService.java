@@ -1,7 +1,6 @@
 package com.training.backend.Services;
 
 import java.util.List;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import com.training.backend.Entity.Course;
@@ -15,6 +14,28 @@ public class CourseService {
   private final CourseRepository courseRepository;
   private final CourseModuleRepository courseModuleRepository;
 
+  // Method to get all courses
+  public List<Course> getAllCourses() {
+    return courseRepository.findAll();
+  }
+
+  // Method to get all courses with progress and badges for a specific user
+  public List<Course> getCoursesForUser(Long userId) {
+    List<Course> courses = courseRepository.findAll();
+    courses.forEach(course -> {
+      course.setProgress(
+          course.getProgress().stream()
+              .filter(p -> p.getUser().getId().equals(userId))
+              .toList());
+      course.setInsignias(
+          course.getInsignias().stream()
+              .filter(i -> i.getUser().getId().equals(userId))
+              .toList());
+    });
+    return courses;
+  }
+
+  // Method to create a new course
   public Course createCourse(Course course) {
     if (!courseModuleRepository.existsById(course.getModule().getId())) {
       throw new RuntimeException(
@@ -23,10 +44,7 @@ public class CourseService {
     return courseRepository.save(course);
   }
 
-  public List<Course> getAllCourses() {
-    return courseRepository.findAll();
-  }
-
+  // Method to update an existing course
   public Course updateCourse(Long id, Course courseDetails) {
     return courseRepository.findById(id).map(course -> {
       course.setTitle(courseDetails.getTitle());
@@ -41,6 +59,7 @@ public class CourseService {
     }).orElseThrow(() -> new RuntimeException("Course not found with id " + id));
   }
 
+  // Method to delete a course
   public void deleteCourse(Long id) {
     try {
       courseRepository.deleteById(id);

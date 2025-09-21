@@ -25,6 +25,7 @@ public class CourseModule {
   private String title;
   private String description;
 
+  // Relation with Course
   @OneToMany(mappedBy = "module")
   @JsonManagedReference(value = "module-courses")
   private List<Course> courses;

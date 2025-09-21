@@ -1,9 +1,8 @@
 package com.training.backend.Entity;
 
 import java.time.LocalDate;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,14 +27,16 @@ public class Insignia {
   private String name;
   private String imageUrl;
 
+  // Relation with User
   @ManyToOne
   @JoinColumn(name = "user_id")
   @JsonBackReference(value = "user-insignia")
   private User user;
 
+  // Relation with Course
   @ManyToOne
   @JoinColumn(name = "course_id")
-  @JsonBackReference(value = "course-insignia")
+  @JsonIgnoreProperties({ "insignias", "module", "progress" })
   private Course course;
 
   private LocalDate dateAwarded;
