@@ -3,10 +3,9 @@ package com.training.backend.Services;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.training.backend.Entity.Insignia;
-import com.training.backend.Entity.Progress;
-import com.training.backend.Entity.ProgressStatus;
 import com.training.backend.Repository.InsigniaRepository;
-import com.training.backend.Repository.ProgressRepository;
+import com.training.backend.Repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -14,7 +13,8 @@ import lombok.RequiredArgsConstructor;
 public class InsigniaService {
 
   private final InsigniaRepository insigniaRepository;
-  private final ProgressRepository progressRepository;
+  private final UserRepository userRepository;
+  private final EmailService emailService;
 
   // Method to get all insignias
   public List<Insignia> getAllInsignias() {
@@ -36,15 +36,24 @@ public class InsigniaService {
       throw new RuntimeException("Insignia ya creada para este curso y usuario");
     }
 
-    Progress progress = progressRepository
-        .findByUserIdAndCourseId(userId, courseId)
-        .orElseThrow(() -> new RuntimeException("No hay progreso registrado para este usuario y curso"));
+    var user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-    if (progress.getStatus() != ProgressStatus.COMPLETED) {
-      throw new RuntimeException("No se puede crear la insignia porque el curso no está completado.");
+    insignia.setUser(user);
+
+    Insignia saved = insigniaRepository.save(insignia);
+
+    // Send email notification
+    String to = user.getEmail();
+    String insigniaName = saved.getName() != null ? saved.getName() : "insignia desconocida";
+
+    if (to != null && !to.isEmpty()) {
+      emailService.sendInsigniaNotification(to, insigniaName);
+    } else {
+      System.err.println("insigniaName: " + insigniaName);
     }
 
-    return insigniaRepository.save(insignia);
+    return saved;
   }
 
 }
